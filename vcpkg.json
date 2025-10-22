@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    "cpp-httplib",
+    "fmt",
+    "openssl",
+    "nlohmann-json"
+  ]
+}
