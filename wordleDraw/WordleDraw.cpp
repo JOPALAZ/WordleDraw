@@ -13,6 +13,8 @@ int main()
     
     //TODO ARGS FOR PATH
     std::filesystem::path path("PATH");
+    
+    //TODO READ FROM FILE
     WordleBitmap bitmap = {
         {
         vector<bool> {1,0,1,0,1},
@@ -23,7 +25,10 @@ int main()
         vector<bool> {0,1,0,1,0}
         }
     };
+
     WordleDrawCore core(path, answer);
+    
+    //TODO PRETTY OUTPUT
     try
     {
         auto a = core.GetWordsForBitmap(bitmap);

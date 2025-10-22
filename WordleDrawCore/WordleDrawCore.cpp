@@ -87,6 +87,7 @@ string WordleDrawCore::MatchWordByLine(vector<bool> line)
 
 vector<string> WordleDrawCore::GetWordsWithMatchOnPosition(vector<string> words, size_t position, vector<bool> mask)
 {
+	//TODO RETRY WITHOUT UNIQUENESS CHECK IF FAILED WITH IT
 	vector<string> matches;
 	bool thisPosMask = mask.at(position);
 	for(string word : words)
