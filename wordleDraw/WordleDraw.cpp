@@ -12,17 +12,17 @@ int main()
     
     
     //TODO ARGS FOR PATH
-    std::filesystem::path path("PATH");
+    std::filesystem::path path("C:\\Users\\ARMENIA\\Downloads\\wordle\\valid-wordle-words.txt");
     
     //TODO READ FROM FILE
     WordleBitmap bitmap = {
         {
-        vector<bool> {1,0,1,0,1},
-        vector<bool> {0,1,0,1,0},
-        vector<bool> {1,0,1,0,1},
-        vector<bool> {0,1,0,1,0},
-        vector<bool> {1,0,1,0,1},
-        vector<bool> {0,1,0,1,0}
+        std::vector<bool> {1,0,1,0,1},
+        std::vector<bool> {0,1,0,1,0},
+        std::vector<bool> {1,0,1,0,1},
+        std::vector<bool> {0,1,0,1,0},
+        std::vector<bool> {1,0,1,0,1},
+        std::vector<bool> {0,1,0,1,0}
         }
     };
 

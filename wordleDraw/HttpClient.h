@@ -5,14 +5,13 @@
 #include <httplib.h>
 #include <fmt/format.h>
 
-using std::string;
-
 class HttpClient
 {
 protected:
-
+    int SafeGetStatus(httplib::Result& res);
+    std::string SafeGetBody(httplib::Result& res);
 public:
     HttpClient();
-    string fetch(string host, string endpoint);
+    std::string fetch(std::string host, std::string endpoint);
 };
 

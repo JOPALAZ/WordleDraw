@@ -155,9 +155,19 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AtLeastGreenWordValidator.h" />
+    <ClInclude Include="AtLeastYellowWordValidator.h" />
+    <ClInclude Include="FallbackLoosePresenceWordValidator.h" />
+    <ClInclude Include="FallbackMixedWordValidator.h" />
+    <ClInclude Include="FallbackPresenceWordValidator.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="MixedWordValidator.h" />
+    <ClInclude Include="PerfectWordValidator.h" />
+    <ClInclude Include="IWordValidator.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PresenceWordValidator.h" />
     <ClInclude Include="WordleDrawCore.h" />
+    <ClInclude Include="WordValidators.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />

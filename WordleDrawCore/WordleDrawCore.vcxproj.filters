@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Abstractions">
+      <UniqueIdentifier>{f63a4739-a82a-4bb1-9e63-b3d95c207290}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WordValidators">
+      <UniqueIdentifier>{3c9511bc-5e65-4a25-ba1c-559c86d2fb09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WordValidators\Headers">
+      <UniqueIdentifier>{53eb441c-c57b-4ec2-b070-a183a2da3341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WordValidators\Sources">
+      <UniqueIdentifier>{17fd2090-462b-4e15-9989-1729b1fb34cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -23,6 +35,36 @@
     </ClInclude>
     <ClInclude Include="WordleDrawCore.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IWordValidator.h">
+      <Filter>Abstractions</Filter>
+    </ClInclude>
+    <ClInclude Include="PerfectWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="PresenceWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="FallbackPresenceWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="FallbackMixedWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MixedWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="WordValidators.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="AtLeastGreenWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="FallbackLoosePresenceWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="AtLeastYellowWordValidator.h">
+      <Filter>WordValidators\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
