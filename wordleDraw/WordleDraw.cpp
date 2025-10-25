@@ -12,7 +12,7 @@ int main()
     
     
     //TODO ARGS FOR PATH
-    std::filesystem::path path("C:\\Users\\ARMENIA\\Downloads\\wordle\\valid-wordle-words.txt");
+    std::filesystem::path path("PATH");
     
     //TODO READ FROM FILE
     WordleBitmap bitmap = {
@@ -26,12 +26,12 @@ int main()
         }
     };
 
-    WordleDrawCore core(path, answer);
+    WordleDrawCore core(path);
     
     //TODO PRETTY OUTPUT
     try
     {
-        auto a = core.GetWordsForBitmap(bitmap);
+        auto a = core.GetWordsForBitmap(bitmap, answer);
         for (auto word : a)
         {
             std::cout << word << std::endl;

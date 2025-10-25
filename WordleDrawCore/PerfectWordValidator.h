@@ -11,6 +11,13 @@ public:
 
 	virtual bool Validate(std::string word, size_t position, std::vector<bool> mask, std::string answer) const override 
 	{
-		return (word.at(position) == answer.at(position)) == mask.at(position) && answer.find(word.at(position)) == std::string::npos;
+		if(mask.at(position))
+		{
+			return word.at(position) == answer.at(position);
+		}
+		else
+		{
+			return answer.find(word.at(position)) == std::string::npos;
+		}
 	};
 };

@@ -151,6 +151,12 @@
     <ClInclude Include="HttpClient.h" />
     <ClInclude Include="WordleRestClient.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WordleDrawCore\WordleDrawCore.vcxproj">
+      <Project>{340b7185-58f4-4267-9ebb-8aa8b10e7fb8}</Project>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

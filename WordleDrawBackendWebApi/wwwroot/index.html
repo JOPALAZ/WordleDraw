@@ -1,0 +1,281 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitmap Solver</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --container-bg: #2a2a2a;
+            --input-bg: #333;
+            --output-bg: #1e1e1e;
+            --text-color: #f0f0f0;
+            --label-color: #e0e0e0;
+            --border-color: #444;
+            --accent-color: #007bff;
+            --accent-hover: #0056b3;
+            --grid-square-bg: #444;
+            --grid-square-border: #666;
+            --grid-square-hover: #555;
+            --grid-square-active: #ffffff;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 20px;
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .grid-square {
+            aspect-ratio: 1 / 1;
+            background-color: var(--grid-square-bg);
+            border: 1px solid var(--grid-square-border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+            .grid-square:hover {
+                background-color: var(--grid-square-hover);
+            }
+
+            .grid-square:active {
+                transform: scale(0.95);
+            }
+
+            .grid-square.is-active {
+                background-color: var(--grid-square-active);
+                border-color: var(--grid-square-active);
+            }
+
+        .controls, .output {
+            margin-bottom: 20px;
+        }
+
+            .controls label, .output label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: var(--label-color);
+            }
+
+        select, button, textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        ::placeholder {
+            color: #888;
+            opacity: 1;
+        }
+
+        :-ms-input-placeholder {
+            color: #888;
+        }
+
+        ::-ms-input-placeholder {
+            color: #888;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease, opacity 0.2s ease;
+        }
+
+            button:hover {
+                background-color: var(--accent-hover);
+            }
+
+            button:disabled {
+                background-color: #444;
+                color: #999;
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+
+        textarea {
+            font-family: 'Courier New', Courier, monospace;
+            resize: vertical;
+            background-color: var(--output-bg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <label>Your Pattern (Bitmap):</label>
+        <div id="grid-container">
+        </div>
+
+        <div class="controls">
+            <label for="enum-select">Validation Mode:</label>
+            <select id="enum-select">
+                <option value="PerferctValidator">Perfect Validator</option>
+                <option value="PresenceValidator">Presence Validator</option>
+                <option value="MixedValidator">Mixed Validator</option>
+                <option value="FallbackPresenceValidator">Fallback Presence Validator</option>
+                <option value="FallbackMixedValidator">Fallback Mixed Validator</option>
+                <option value="AtLeastGreenValidator">At Least Green Validator</option>
+                <option value="AtLeastYellowValidator">At Least Yellow Validator</option>
+                <option value="NotSpecified">Not Specified</option>
+            </select>
+        </div>
+
+        <div class="controls">
+            <label for="answer-field">Target Word:</label>
+            <input type="text" id="answer-field" placeholder="Loading target word..." />
+        </div>
+
+        <div class="controls">
+            <button id="submit-button">Find Words</button>
+        </div>
+
+        <div class="output">
+            <label for="output-field">Matching Words:</label>
+            <textarea id="output-field" rows="6" readonly></textarea>
+        </div>
+
+    </div>
+
+    <script>
+        const ROWS = 6;
+        const COLS = 5;
+
+        let gridState = Array(ROWS).fill(0).map(() => Array(COLS).fill(0));
+
+        const gridContainer = document.getElementById('grid-container');
+        const enumSelect = document.getElementById('enum-select');
+        const submitButton = document.getElementById('submit-button');
+        const outputField = document.getElementById('output-field');
+        const answerField = document.getElementById('answer-field');
+
+        const originalButtonText = submitButton.textContent;
+
+        function createGrid() {
+            gridContainer.innerHTML = '';
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const square = document.createElement('div');
+                    square.classList.add('grid-square');
+                    square.dataset.row = i;
+                    square.dataset.col = j;
+                    square.addEventListener('click', handleSquareClick);
+                    gridContainer.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(event) {
+            const square = event.target;
+            const row = square.dataset.row;
+            const col = square.dataset.col;
+            square.classList.toggle('is-active');
+
+            gridState[row][col] = square.classList.contains('is-active') ? 1 : 0;
+        }
+
+        submitButton.addEventListener('click', async () => {
+            const postBody = {
+                grid: gridState,
+                enumValue: enumSelect.value,
+                answer: answerField.value
+            };
+
+            outputField.value = 'Finding words...';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Searching...';
+
+            try {
+                const response = await fetch(`${window.location.origin}/calculateWordleAnswer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(postBody)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    outputField.value = result.response;
+                } else {
+                    outputField.value = `Error: ${result.response || 'Unknown server error'}`;
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                outputField.value = 'Connection error. Please try again later.';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        });
+
+        async function fetchCurrentAnswer() {
+            answerField.placeholder = "Loading target word...";
+            outputField.value = '';
+
+            try {
+                const response = await fetch(`${window.location.origin}/getAnswerWord`);
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+
+                const answerText = await response.text();
+                answerField.value = answerText;
+                answerField.placeholder = "Enter target word";
+
+            } catch (error) {
+                console.error("Failed to fetch Wordle answer from backend:", error);
+                answerField.value = "";
+                answerField.placeholder = "Error loading word";
+                outputField.value = 'Failed to load initial data from the server. Please check connection and reload.';
+            }
+        }
+
+        createGrid();
+        fetchCurrentAnswer();
+    </script>
+
+</body>
+</html>

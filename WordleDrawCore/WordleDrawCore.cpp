@@ -4,30 +4,25 @@
 
 using std::string;
 using std::vector;
-WordleDrawCore::WordleDrawCore(const std::filesystem::path& pathToRefences, const string& answerWord)
+WordleDrawCore::WordleDrawCore(const std::filesystem::path& pathToRefences)
 {
-	ConstructClass(pathToRefences, answerWord);
+	ConstructClass(pathToRefences);
 }
-WordleDrawCore::WordleDrawCore(std::filesystem::path& pathToRefences, string& answerWord)
+WordleDrawCore::WordleDrawCore(std::filesystem::path& pathToRefences)
 {
-	ConstructClass(pathToRefences, answerWord);
+	ConstructClass(pathToRefences);
 }
 
-void WordleDrawCore::ConstructClass(const std::filesystem::path& pathToRefences, const string& answerWord)
+void WordleDrawCore::ConstructClass(const std::filesystem::path& pathToRefences)
 {
-	LoadReferences(pathToRefences, answerWord);
+	LoadReferences(pathToRefences);
 	if(WordsReferences.empty())
 	{
 		throw std::runtime_error("No reference words were loaded.");
 	}
-	if(answerWord.size() != WordsReferences.at(0).size())
-	{
-		throw std::runtime_error("Word length doesn't match for reference ["+ std::to_string(answerWord.size()) +"] and for answer ["+ std::to_string(WordsReferences.at(0).size()) + "].");
-	}
-	AnswerWord = answerWord;
 }
 
-void WordleDrawCore::LoadReferences(const std::filesystem::path& pathToRefences, const string& answerWord)
+void WordleDrawCore::LoadReferences(const std::filesystem::path& pathToRefences)
 {
 	std::ifstream filestream;
 	try
@@ -42,22 +37,20 @@ void WordleDrawCore::LoadReferences(const std::filesystem::path& pathToRefences,
 	std::optional<size_t> lastLength;
 	while (filestream >> line)
 	{
-		if (line != answerWord)
+		if(!lastLength.has_value() || lastLength.value() == line.size())
 		{
-			if(!lastLength.has_value() || lastLength.value() == line.size())
-			{
-				WordsReferences.push_back(line);
-				lastLength.emplace(line.size());
-			}
-			else
-			{
-				throw std::runtime_error("Length of loaded words is inconsistent.");
-			}
+			WordsReferences.push_back(line);
+			lastLength.emplace(line.size());
 		}
+		else
+		{
+			throw std::runtime_error("Length of loaded words is inconsistent.");
+		}
+
 	}
 }
 
-vector<string> WordleDrawCore::GetWordsForBitmap(const WordleBitmap& bitmap, const ValidatorType& validatorType)
+vector<string> WordleDrawCore::GetWordsForBitmap(const WordleBitmap& bitmap, const std::string& answer, const ValidatorType& validatorType)
 {
 	vector<string> words;
 	std::string validatorNames = "";
@@ -75,7 +68,7 @@ vector<string> WordleDrawCore::GetWordsForBitmap(const WordleBitmap& bitmap, con
 			validatorNames += validator.get()->GetValidatorName() + ", ";
 			for (const vector<bool>& line : bitmap)
 			{
-				words.push_back(WordleDrawCore::MatchWordByLine(line, validator));
+				words.push_back(WordleDrawCore::MatchWordByLine(line, validator, answer));
 			}
 
 			std::cout << "Found words using validator [" + validator.get()->GetValidatorName() + "] " << std::endl;
@@ -89,15 +82,15 @@ vector<string> WordleDrawCore::GetWordsForBitmap(const WordleBitmap& bitmap, con
 
 	validatorNames = validatorNames.length() > 2 ? validatorNames.substr(0, validatorNames.length() - 2) : validatorNames;
 
-	throw std::runtime_error("Couldn't find words for bitmat that whould satisfy given bitmap. Tried thre validators : [" + validatorNames + "]");
+	throw std::runtime_error("Couldn't find words for bitmap that would satisfy given bitmap. Tried these validators : [" + validatorNames + "]");
 }
 
-string WordleDrawCore::MatchWordByLine(const vector<bool>& line, const std::unique_ptr<IWordValidator>& validator)
+string WordleDrawCore::MatchWordByLine(const vector<bool>& line, const std::unique_ptr<IWordValidator>& validator, const std::string& answer)
 {
 	vector<string> eligibleWords = WordsReferences;
 	for(size_t i = 0; i<line.size(); ++i)
 	{
-		vector<string> bufWords = GetWordsWithMatchOnPosition(eligibleWords, i, line, validator);
+		vector<string> bufWords = GetWordsWithMatchOnPosition(eligibleWords, i, line, validator, answer);
 		eligibleWords = std::move(bufWords);
 	}
 
@@ -108,7 +101,7 @@ string WordleDrawCore::MatchWordByLine(const vector<bool>& line, const std::uniq
 		{
 			pattern.push_back(el ? 'X' : '_');
 		}
-		throw std::runtime_error("Couldn not find a word with this pattern: [" + pattern + "] and validator [" + validator.get()->GetValidatorName() +"] ");
+		throw std::runtime_error("Could not find a word with this pattern: [" + pattern + "] and validator [" + validator.get()->GetValidatorName() +"] ");
 	}
 	return eligibleWords.front();
 }
@@ -153,12 +146,12 @@ void WordleDrawCore::GenerateValidators(std::vector<std::unique_ptr<IWordValidat
 	}
 }
 
-vector<string> WordleDrawCore::GetWordsWithMatchOnPosition(const vector<string>& words, size_t position, const vector<bool>& mask, const std::unique_ptr<IWordValidator>& validator)
+vector<string> WordleDrawCore::GetWordsWithMatchOnPosition(const vector<string>& words, size_t position, const vector<bool>& mask, const std::unique_ptr<IWordValidator>& validator, const std::string& answer)
 {
 	vector<string> matches;
 	for(const string& word : words)
 	{
-		if(validator.get()->Validate(word, position, mask, AnswerWord))
+		if(word != answer && validator.get()->Validate(word, position, mask, answer))
 		{
 			matches.push_back(word);
 		}

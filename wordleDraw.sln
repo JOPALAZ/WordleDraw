@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordleDraw", "wordleDraw\wordleDraw.vcxproj", "{8CE61634-B63F-478B-A501-AE9CE95DC4D3}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordleDraw", "wordleDraw\wo
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordleDrawCore", "WordleDrawCore\WordleDrawCore.vcxproj", "{340B7185-58F4-4267-9EBB-8AA8B10E7FB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordleDrawBackendWebApi", "WordleDrawBackendWebApi\WordleDrawBackendWebApi.csproj", "{AA1C4726-5AC4-4A43-9493-C493661C25E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,14 @@ Global
 		{340B7185-58F4-4267-9EBB-8AA8B10E7FB8}.Release|x64.Build.0 = Release|x64
 		{340B7185-58F4-4267-9EBB-8AA8B10E7FB8}.Release|x86.ActiveCfg = Release|Win32
 		{340B7185-58F4-4267-9EBB-8AA8B10E7FB8}.Release|x86.Build.0 = Release|Win32
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Debug|x64.ActiveCfg = Debug|x64
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Debug|x64.Build.0 = Debug|x64
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Debug|x86.ActiveCfg = Debug|x86
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Debug|x86.Build.0 = Debug|x86
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Release|x64.ActiveCfg = Release|x64
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Release|x64.Build.0 = Release|x64
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Release|x86.ActiveCfg = Release|x86
+		{AA1C4726-5AC4-4A43-9493-C493661C25E4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
