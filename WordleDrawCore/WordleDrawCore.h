@@ -68,9 +68,16 @@ public:
 		AtLeastYellowValidator,
 		NotSpecified
 	};
+	enum WORDLEDRAW_API Color
+	{
+		Black,
+		Yellow,
+		Green
+	};
 	WordleDrawCore(const std::filesystem::path& pathToRefences);
 	WordleDrawCore(std::filesystem::path& pathToRefences);
 	std::vector<std::string> GetWordsForBitmap(const WordleBitmap& bitmap, const std::string& answer, const ValidatorType& validatorType = NotSpecified);
+	std::vector<std::vector<Color>> GetColorsForWordAndAnswer(const std::string& answer, const std::vector<std::string>& words);
 
 protected:
 	void ConstructClass(const std::filesystem::path& pathToRefences);
@@ -167,6 +174,62 @@ extern "C" {
 		catch (...)
 		{
 			strncpy_s(outputBuffer, bufferSize, "UNKNOWN_CPP_EXCEPTION", _TRUNCATE);
+			return -99;
+		}
+	}
+
+	__declspec(dllexport) int GetColorsForWordAndAnswer(void* instance,
+		const char* answer,
+		const char** words,
+		int wordAmount,
+		int* outputBuffer,
+		int bufferSize,
+		char* exceptionBuffer,
+		int exceptionBufferSize)
+	{
+		if (!instance || !words || !answer || !outputBuffer || !exceptionBuffer) return -10;
+
+		try
+		{
+			std::vector<std::string> wordsVector;
+			std::string answerString(answer);
+			for (size_t i = 0; i < wordAmount;++i)
+			{
+				wordsVector.push_back(words[i]);
+			}
+			auto colorVector = static_cast<WordleDrawCore*>(instance)->GetColorsForWordAndAnswer(answerString, wordsVector);
+			int neededBufferSize = colorVector.size() * answerString.size();
+			if(bufferSize < neededBufferSize)
+			{
+				throw std::runtime_error("The outputBuffer is too small for the result, needed [" + std::to_string(neededBufferSize) + "] positions.");
+			}
+
+			for(size_t i = 0; i < colorVector.size(); ++i)
+			{
+				const std::vector<WordleDrawCore::Color>& colorLine = colorVector.at(i);
+				for (size_t j = 0; j < colorLine.size();++j)
+				{
+					outputBuffer[i * answerString.size() + j] = static_cast<int>(colorLine.at(j));
+				}
+			}
+			
+			return neededBufferSize;
+		}
+		catch (const std::exception& e)
+		{
+			if (strlen(e.what()) + 1 <= (size_t)exceptionBufferSize)
+			{
+				strncpy_s(exceptionBuffer, exceptionBufferSize, e.what(), _TRUNCATE);
+			}
+			else
+			{
+				strncpy_s(exceptionBuffer, exceptionBufferSize, "CPP_EXCEPTION_MSG_TOO_LONG", _TRUNCATE);
+			}
+			return -3;
+		}
+		catch (...)
+		{
+			strncpy_s(exceptionBuffer, exceptionBufferSize, "UNKNOWN_CPP_EXCEPTION", _TRUNCATE);
 			return -99;
 		}
 	}

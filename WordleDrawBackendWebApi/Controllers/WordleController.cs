@@ -25,11 +25,25 @@ namespace WordleDrawBackendWebApi.Controllers
             }
             catch (NoSolutionException ex)
             {
-                return BadRequest(new { Response = string.Join('\n', ex.Message) });
+                return BadRequest(new { Response = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Response = string.Join('\n', ex.Message) });
+                return StatusCode(500, new { Response = ex.Message });
+            }
+        }
+
+        [HttpPost("/colors")]
+        public IActionResult getColors([FromBody] ColorRequest requestModel) 
+        {
+            try
+            {
+                var result = wrapper.GetColors(requestModel);
+                return Ok(new { Response = result });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Response = ex.Message });
             }
         }
     }

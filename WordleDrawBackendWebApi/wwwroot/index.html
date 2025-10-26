@@ -19,6 +19,9 @@
             --grid-square-border: #666;
             --grid-square-hover: #555;
             --grid-square-active: #ffffff;
+            --color-black: #3a3a3c;
+            --color-yellow: #b59f3b;
+            --color-green: #538d4e;
         }
 
         body {
@@ -139,6 +142,43 @@
             resize: vertical;
             background-color: var(--output-bg);
         }
+
+        #color-grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 8px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 10px;
+        }
+
+        .color-square {
+            aspect-ratio: 1 / 1;
+            background-color: var(--grid-square-bg);
+            border: 1px solid var(--grid-square-border);
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+            .color-square.black {
+                background-color: var(--color-black);
+                border-color: var(--color-black);
+            }
+
+            .color-square.yellow {
+                background-color: var(--color-yellow);
+                border-color: var(--color-yellow);
+            }
+
+            .color-square.green {
+                background-color: var(--color-green);
+                border-color: var(--color-green);
+            }
     </style>
 </head>
 <body>
@@ -176,6 +216,12 @@
             <textarea id="output-field" rows="6" readonly></textarea>
         </div>
 
+        <div class="output">
+            <label for="color-grid-container">Wordle Colors:</label>
+            <div id="color-grid-container">
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -190,7 +236,16 @@
         const outputField = document.getElementById('output-field');
         const answerField = document.getElementById('answer-field');
 
+        const colorGridContainer = document.getElementById('color-grid-container');
+        let colorGridCells = [];
+
         const originalButtonText = submitButton.textContent;
+
+        const colorMap = {
+            0: 'black',
+            1: 'yellow',
+            2: 'green'
+        };
 
         function createGrid() {
             gridContainer.innerHTML = '';
@@ -205,6 +260,79 @@
                 }
             }
         }
+
+        function createColorGrid() {
+            colorGridContainer.innerHTML = '';
+            colorGridCells = [];
+            for (let i = 0; i < ROWS; i++) {
+                const rowArray = [];
+                for (let j = 0; j < COLS; j++) {
+                    const square = document.createElement('div');
+                    square.classList.add('color-square');
+                    colorGridContainer.appendChild(square);
+                    rowArray.push(square);
+                }
+                colorGridCells.push(rowArray);
+            }
+        }
+
+        function updateColorGrid(colorData) {
+            if (!colorData || colorData.length !== ROWS || !colorData[0] || colorData[0].length !== COLS) {
+                console.error("Invalid color data received:", colorData);
+                return;
+            }
+
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const cell = colorGridCells[i][j];
+                    const colorValue = colorData[i][j];
+
+                    cell.className = 'color-square';
+
+                    const colorName = colorMap[colorValue];
+
+                    if (colorName) {
+                        cell.classList.add(colorName);
+                    }
+                }
+            }
+        }
+
+        function resetColorGrid() {
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    if (colorGridCells[i] && colorGridCells[i][j]) {
+                        colorGridCells[i][j].className = 'color-square';
+                    }
+                }
+            }
+        }
+
+        async function fetchColors(answer, words) {
+            const postBody = {
+                answer: answer,
+                words: words
+            };
+
+            try {
+                const response = await fetch(`${window.location.origin}/colors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(postBody)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    updateColorGrid(result.response);
+                } else {
+                    console.error('Error fetching colors:', result.response || 'Unknown server error');
+                }
+            } catch (error) {
+                console.error('Fetch error for /colors:', error);
+            }
+        }
+
 
         function handleSquareClick(event) {
             const square = event.target;
@@ -223,6 +351,7 @@
             };
 
             outputField.value = 'Finding words...';
+            resetColorGrid();
             submitButton.disabled = true;
             submitButton.textContent = 'Searching...';
 
@@ -236,7 +365,28 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    outputField.value = result.response;
+
+                    let words = [];
+                    let outputText = "";
+
+                    if (Array.isArray(result.response)) {
+                        words = result.response;
+                        outputText = words.join('\n');
+                    } else if (typeof result.response === 'string') {
+                        outputText = result.response;
+                        words = outputText.split('\n').filter(Boolean);
+                    } else {
+                        outputText = "Error: Unexpected response format.";
+                    }
+
+                    outputField.value = outputText;
+
+                    const answer = answerField.value;
+
+                    if (answer && words.length > 0) {
+                        await fetchColors(answer, words);
+                    }
+
                 } else {
                     outputField.value = `Error: ${result.response || 'Unknown server error'}`;
                 }
@@ -274,6 +424,7 @@
         }
 
         createGrid();
+        createColorGrid();
         fetchCurrentAnswer();
     </script>
 

@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <Content Update="wwwroot\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(SolutionDir)$(Platform)\$(Configuration)\WordleDrawCore.dll&quot; &quot;$(TargetDir)&quot;" />
+    <Exec Command="xcopy /Y /R &quot;$(SolutionDir)$(Platform)\$(Configuration)\WordleDrawCore.dll&quot; &quot;$(TargetDir)&quot;" />
   </Target>
 
 </Project>

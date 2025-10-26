@@ -14,5 +14,6 @@
 #include <fstream>
 #include <exception>
 #include <vector>
+#include <unordered_map>
 
 #endif //PCH_H

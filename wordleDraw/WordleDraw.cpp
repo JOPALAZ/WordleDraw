@@ -10,9 +10,7 @@ int main()
     WordleRestClient client;
     string answer = client.GetCurrentAnswerWord();
     
-    
-    //TODO ARGS FOR PATH
-    std::filesystem::path path("PATH");
+    std::filesystem::path path("valid-wordle-words.txt");
     
     //TODO READ FROM FILE
     WordleBitmap bitmap = {
@@ -26,15 +24,29 @@ int main()
         }
     };
 
+    char colors[3] {'B','Y','G'};
+
     WordleDrawCore core(path);
     
     //TODO PRETTY OUTPUT
     try
     {
         auto a = core.GetWordsForBitmap(bitmap, answer);
-        for (auto word : a)
+        for (auto& word : a)
         {
             std::cout << word << std::endl;
+        }
+        auto b = core.GetColorsForWordAndAnswer(answer, a);
+
+        std::cout << std::endl;
+
+        for (auto& colorLine : b)
+        {
+            for(auto& color : colorLine )
+            {
+                std::cout << colors[static_cast<int>(color)];
+            }
+            std::cout << std::endl;
         }
     }
     catch(std::exception ex)

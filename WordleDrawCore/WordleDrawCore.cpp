@@ -4,6 +4,20 @@
 
 using std::string;
 using std::vector;
+
+int calculateOcurrences(const string& word, const char& ch, const size_t& toPos)
+{
+	int occurences = 0;
+	for (size_t pos = 0; pos < word.size() && pos <= toPos;++pos)
+	{
+		if(word.at(pos) == ch)
+		{
+			occurences += 1;
+		}
+	}
+	return occurences;
+}
+
 WordleDrawCore::WordleDrawCore(const std::filesystem::path& pathToRefences)
 {
 	ConstructClass(pathToRefences);
@@ -84,6 +98,60 @@ vector<string> WordleDrawCore::GetWordsForBitmap(const WordleBitmap& bitmap, con
 
 	throw std::runtime_error("Couldn't find words for bitmap that would satisfy given bitmap. Tried these validators : [" + validatorNames + "]");
 }
+
+vector<vector<WordleDrawCore::Color>> WordleDrawCore::GetColorsForWordAndAnswer(const string& answer, const vector<string>& words)
+{
+
+	std::unordered_map<char, int> answerCharHitcountMap;
+	vector<vector<WordleDrawCore::Color>> result;
+
+	for(const char& ch : answer)
+	{
+		if(answerCharHitcountMap.contains(ch))
+		{
+			answerCharHitcountMap[ch] += 1;
+		}
+		else
+		{
+			answerCharHitcountMap[ch] = 1;
+		}
+	}
+
+	for(const std::string& word : words)
+	{
+		if(word.size() != answer.size())
+		{
+			throw std::invalid_argument("Words length is inconsistent with answer lenght");
+		}
+		vector<WordleDrawCore::Color> buffer;
+		for(size_t pos = 0; pos < word.size();++pos)
+		{
+			const char& wordChar = word.at(pos);
+			const char& answerChar = answer.at(pos);
+
+			if(wordChar == answerChar)
+			{
+				buffer.push_back(Green);
+			}
+			else
+			{
+				if (calculateOcurrences(word, wordChar, pos) <= answerCharHitcountMap[wordChar])
+				{
+					buffer.push_back(Yellow);
+				}
+				else
+				{
+					buffer.push_back(Black);
+				}
+			}
+		}
+		result.push_back(buffer);
+	}
+
+	return result;
+}
+
+
 
 string WordleDrawCore::MatchWordByLine(const vector<bool>& line, const std::unique_ptr<IWordValidator>& validator, const std::string& answer)
 {
