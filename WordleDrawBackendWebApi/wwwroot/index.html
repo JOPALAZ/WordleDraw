@@ -1,261 +1,417 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitmap Solver</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Wordle Bitmap Drawing Solver</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --container-bg: #2a2a2a;
-            --input-bg: #333;
-            --output-bg: #1e1e1e;
-            --text-color: #f0f0f0;
-            --label-color: #e0e0e0;
-            --border-color: #444;
-            --accent-color: #007bff;
-            --accent-hover: #0056b3;
-            --grid-square-bg: #444;
-            --grid-square-border: #666;
-            --grid-square-hover: #555;
-            --grid-square-active: #ffffff;
+            --bg: #0f1112;
+            --panel: #17191a;
+            --muted: #9aa0a6;
+            --text: #e7eaee;
+            --input: #1f2224;
+            --accent: #2b8cff;
+            --accent-strong: #1967d2;
+            --border: rgba(255,255,255,0.04);
+            --grid-square: #3a3a3c;
+            --grid-square-border: rgba(255,255,255,0.06);
+            --grid-active: #f6f7f8;
+            --gap: 10px;
+            --radius: 10px;
+            --max-width: 1200px;
+            --mobile-break: 720px;
+            --small: 14px;
+            --regular: 16px;
+            --large: 18px;
+            --shadow: 0 8px 28px rgba(0,0,0,0.6);
             --color-black: #3a3a3c;
             --color-yellow: #b59f3b;
             --color-green: #538d4e;
         }
 
-        body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+        * {
+            box-sizing: border-box
         }
 
-        .container {
-            max-width: 800px;
+        html {
+            background-color: var(--bg);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg,var(--bg),#0b0c0d 140%);
+            color: var(--text);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 28px;
+        }
+
+        .app {
             width: 100%;
-            margin: 20px;
-            background-color: var(--container-bg);
-            padding: 25px;
+            max-width: var(--max-width);
+            background: linear-gradient(180deg,var(--panel),#111213 120%);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: grid;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            padding: 6px 8px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .hint {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .main {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: 1fr 420px;
+            align-items: start;
+        }
+
+        .left {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .right {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color);
+            padding: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
         }
 
         #grid-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(5,1fr);
             gap: 8px;
-            max-width: 500px;
             width: 100%;
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            margin-bottom: 25px;
-            border-radius: 8px;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: 520px;
+            margin: 0 auto;
+            touch-action: manipulation;
         }
 
         .grid-square {
-            aspect-ratio: 1 / 1;
-            background-color: var(--grid-square-bg);
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: var(--grid-square);
+            border-radius: 8px;
             border: 1px solid var(--grid-square-border);
-            border-radius: 4px;
+            display: inline-block;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25);
         }
 
-            .grid-square:hover {
-                background-color: var(--grid-square-hover);
-            }
-
             .grid-square:active {
-                transform: scale(0.95);
+                transform: scale(.98)
             }
 
             .grid-square.is-active {
-                background-color: var(--grid-square-active);
-                border-color: var(--grid-square-active);
+                background: var(--grid-active);
+                border-color: var(--grid-active);
+                box-shadow: 0 6px 18px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.12);
             }
 
-        .controls, .output {
-            margin-bottom: 20px;
+        .grid-row-labels {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
         }
 
-            .controls label, .output label {
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 600;
-                color: var(--label-color);
-            }
-
-        select, button, textarea, input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--input-bg);
-            color: var(--text-color);
-        }
-
-        ::placeholder {
-            color: #888;
-            opacity: 1;
-        }
-
-        :-ms-input-placeholder {
-            color: #888;
-        }
-
-        ::-ms-input-placeholder {
-            color: #888;
-        }
-
-        button {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            cursor: pointer;
+        .grid-title {
+            font-size: var(--large);
             font-weight: 600;
-            transition: background-color 0.2s ease, opacity 0.2s ease;
-        }
-
-            button:hover {
-                background-color: var(--accent-hover);
-            }
-
-            button:disabled {
-                background-color: #444;
-                color: #999;
-                opacity: 0.7;
-                cursor: not-allowed;
-            }
-
-        textarea {
-            font-family: 'Courier New', Courier, monospace;
-            resize: vertical;
-            background-color: var(--output-bg);
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 12px;
         }
 
         #color-grid-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(5,1fr);
             gap: 8px;
-            max-width: 500px;
-            width: 100%;
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            border-radius: 8px;
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 10px;
+            max-width: 520px;
+            margin: 6px auto 0;
         }
 
         .color-square {
-            aspect-ratio: 1 / 1;
-            background-color: var(--grid-square-bg);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
             border: 1px solid var(--grid-square-border);
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
+            background: var(--grid-square);
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.18);
         }
 
-            .color-square.black {
-                background-color: var(--color-black);
-                border-color: var(--color-black);
+        .controls-grid {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        select, input[type="text"], textarea, button {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: var(--regular);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--input);
+            color: var(--text);
+            outline: none;
+            caret-color: var(--accent);
+            box-shadow: none;
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: monospace;
+            min-height: 120px
+        }
+
+        button {
+            background: linear-gradient(180deg,var(--accent),var(--accent-strong));
+            border: none;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .08s ease, opacity .12s ease;
+        }
+
+            button:active {
+                transform: translateY(1px)
             }
 
-            .color-square.yellow {
-                background-color: var(--color-yellow);
-                border-color: var(--color-yellow);
+            button:disabled {
+                opacity: .6;
+                filter: grayscale(.2);
+                cursor: not-allowed
             }
 
-            .color-square.green {
-                background-color: var(--color-green);
-                border-color: var(--color-green);
+        .small-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+            .small-row > * {
+                flex: 1
             }
+
+        .footer-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        @media (max-width: 1100px) {
+            .main {
+                grid-template-columns: 1fr 380px
+            }
+        }
+
+        @media (max-width: var(--mobile-break)) {
+            .app {
+                padding: 14px;
+                border-radius: 12px
+            }
+
+            .main {
+                grid-template-columns: 1fr;
+                padding: 0
+            }
+
+            #grid-container, #color-grid-container {
+                max-width: 100%
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px
+            }
+
+            .right {
+                order: 2
+            }
+
+            .left {
+                order: 1
+            }
+
+            .card {
+                padding: 12px
+            }
+
+            select, input, textarea, button {
+                font-size: 15px
+            }
+
+            .grid-square {
+                border-radius: 8px
+            }
+
+            #grid-container {
+                gap: 10px
+            }
+        }
+
+        .grid-square:focus {
+            outline: 3px solid rgba(43,140,255,0.16);
+            outline-offset: 2px
+        }
+
+        select:focus, input:focus, textarea:focus, button:focus {
+            box-shadow: 0 6px 18px rgba(43,140,255,0.08)
+        }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <label>Your Pattern (Bitmap):</label>
-        <div id="grid-container">
-        </div>
-
-        <div class="controls">
-            <label for="enum-select">Validation Mode:</label>
-            <select id="enum-select">
-                <option value="PerferctValidator">Perfect Validator</option>
-                <option value="PresenceValidator">Presence Validator</option>
-                <option value="MixedValidator">Mixed Validator</option>
-                <option value="FallbackPresenceValidator">Fallback Presence Validator</option>
-                <option value="FallbackMixedValidator">Fallback Mixed Validator</option>
-                <option value="AtLeastGreenValidator">At Least Green Validator</option>
-                <option value="AtLeastYellowValidator">At Least Yellow Validator</option>
-                <option value="NotSpecified">Not Specified</option>
-            </select>
-        </div>
-
-        <div class="controls">
-            <label for="answer-field">Target Word:</label>
-            <input type="text" id="answer-field" placeholder="Loading target word..." />
-        </div>
-
-        <div class="controls">
-            <button id="submit-button">Find Words</button>
-        </div>
-
-        <div class="output">
-            <label for="output-field">Matching Words:</label>
-            <textarea id="output-field" rows="6" readonly></textarea>
-        </div>
-
-        <div class="output">
-            <label for="color-grid-container">Wordle Colors:</label>
-            <div id="color-grid-container">
+    <div class="app" role="application" aria-labelledby="app-title">
+        <div class="header">
+            <div>
+                <div id="app-title" class="title">Wordle Bitmap Drawing Solver</div>
             </div>
         </div>
 
+        <div class="main">
+            <div class="left">
+                <div class="card" aria-hidden="false">
+                    <label class="label grid-title">Your Pattern (Bitmap)</label>
+                    <div id="grid-container" aria-label="bitmap-grid" role="grid"></div>
+
+                    <div style="margin-top:20px">
+                        <label class="label grid-title">Wordle Colors</label>
+                        <div id="color-grid-container" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right">
+                <div class="card">
+                    <div class="controls-grid">
+                        <div class="controls">
+                            <label class="label" for="enum-select">Validation Mode</label>
+                            <select id="enum-select" aria-label="Validation Mode">
+                                <option value="PerferctValidator">Perfect Validator</option>
+                                <option value="PresenceValidator">Presence Validator</option>
+                                <option value="MixedValidator">Mixed Validator</option>
+                                <option value="FallbackPresenceValidator">Fallback Presence Validator</option>
+                                <option value="FallbackMixedValidator">Fallback Mixed Validator</option>
+                                <option value="AtLeastGreenValidator">At Least Green Validator</option>
+                                <option value="AtLeastYellowValidator">At Least Yellow Validator</option>
+                                <option value="NotSpecified">Not Specified</option>
+                            </select>
+                        </div>
+
+                        <div class="controls">
+                            <label class="label" for="answer-field">Target Word</label>
+                            <input id="answer-field" type="text" placeholder="Loading target word..." autocomplete="off" />
+                        </div>
+
+                        <div class="controls">
+                            <label class="label" for="output-field">Matching Words</label>
+                            <textarea id="output-field" rows="8" readonly placeholder="Results will appear here"></textarea>
+                        </div>
+
+                        <div class="controls small-row">
+                            <div style="flex:1">
+                                <button id="submit-button">Find Words</button>
+                            </div>
+                            <div style="width:120px">
+                                <button id="clear-button" type="button" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-weight:600">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+                    <div style="color:var(--muted);font-size:13px">Quick actions</div>
+                    <div class="footer-actions">
+                        <button id="copy-button" type="button" title="Copy matches">Copy</button>
+                        <button id="download-button" type="button" title="Download matches">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const ROWS = 6;
         const COLS = 5;
-
-        let gridState = Array(ROWS).fill(0).map(() => Array(COLS).fill(0));
-
+        let gridState = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => 0));
         const gridContainer = document.getElementById('grid-container');
         const enumSelect = document.getElementById('enum-select');
         const submitButton = document.getElementById('submit-button');
         const outputField = document.getElementById('output-field');
         const answerField = document.getElementById('answer-field');
-
         const colorGridContainer = document.getElementById('color-grid-container');
-        let colorGridCells = [];
-
+        const clearButton = document.getElementById('clear-button');
+        const copyButton = document.getElementById('copy-button');
+        const downloadButton = document.getElementById('download-button');
         const originalButtonText = submitButton.textContent;
-
-        const colorMap = {
-            0: 'black',
-            1: 'yellow',
-            2: 'green'
-        };
+        const colorMap = { 0: 'black', 1: 'yellow', 2: 'green' };
+        let colorGridCells = [];
 
         function createGrid() {
             gridContainer.innerHTML = '';
-            for (let i = 0; i < ROWS; i++) {
-                for (let j = 0; j < COLS; j++) {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
                     const square = document.createElement('div');
-                    square.classList.add('grid-square');
-                    square.dataset.row = i;
-                    square.dataset.col = j;
-                    square.addEventListener('click', handleSquareClick);
+                    square.className = 'grid-square';
+                    square.dataset.row = r;
+                    square.dataset.col = c;
+                    square.tabIndex = 0;
+                    square.setAttribute('role', 'button');
+                    square.setAttribute('aria-pressed', 'false');
+                    square.addEventListener('click', handleSquareToggle);
+                    square.addEventListener('keydown', (e) => {
+                        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleSquareToggle({ target: square }); }
+                    });
                     gridContainer.appendChild(square);
                 }
             }
@@ -264,169 +420,154 @@
         function createColorGrid() {
             colorGridContainer.innerHTML = '';
             colorGridCells = [];
-            for (let i = 0; i < ROWS; i++) {
-                const rowArray = [];
-                for (let j = 0; j < COLS; j++) {
-                    const square = document.createElement('div');
-                    square.classList.add('color-square');
-                    colorGridContainer.appendChild(square);
-                    rowArray.push(square);
+            for (let r = 0; r < ROWS; r++) {
+                const row = [];
+                for (let c = 0; c < COLS; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = 'color-square';
+                    colorGridContainer.appendChild(sq);
+                    row.push(sq);
                 }
-                colorGridCells.push(rowArray);
+                colorGridCells.push(row);
+            }
+        }
+
+        function handleSquareToggle(ev) {
+            const el = ev.target;
+            const r = Number(el.dataset.row);
+            const c = Number(el.dataset.col);
+            const now = !el.classList.contains('is-active');
+            if (now) {
+                el.classList.add('is-active');
+                el.setAttribute('aria-pressed', 'true');
+                gridState[r][c] = 1;
+            } else {
+                el.classList.remove('is-active');
+                el.setAttribute('aria-pressed', 'false');
+                gridState[r][c] = 0;
             }
         }
 
         function updateColorGrid(colorData) {
-            if (!colorData || colorData.length !== ROWS || !colorData[0] || colorData[0].length !== COLS) {
-                console.error("Invalid color data received:", colorData);
-                return;
-            }
-
-            for (let i = 0; i < ROWS; i++) {
-                for (let j = 0; j < COLS; j++) {
-                    const cell = colorGridCells[i][j];
-                    const colorValue = colorData[i][j];
-
+            if (!colorData || colorData.length !== ROWS) return;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = colorGridCells[r][c];
+                    const val = colorData[r][c];
                     cell.className = 'color-square';
-
-                    const colorName = colorMap[colorValue];
-
-                    if (colorName) {
-                        cell.classList.add(colorName);
+                    const name = colorMap[val];
+                    if (name) {
+                        if (name === 'black') cell.style.background = 'var(--color-black)';
+                        if (name === 'yellow') cell.style.background = 'var(--color-yellow)';
+                        if (name === 'green') cell.style.background = 'var(--color-green)';
+                    } else {
+                        cell.style.background = '';
                     }
                 }
             }
         }
 
         function resetColorGrid() {
-            for (let i = 0; i < ROWS; i++) {
-                for (let j = 0; j < COLS; j++) {
-                    if (colorGridCells[i] && colorGridCells[i][j]) {
-                        colorGridCells[i][j].className = 'color-square';
-                    }
-                }
-            }
+            colorGridCells.forEach(row => row.forEach(cell => { cell.className = 'color-square'; cell.style.background = ''; }));
         }
 
         async function fetchColors(answer, words) {
-            const postBody = {
-                answer: answer,
-                words: words
-            };
-
+            const postBody = { answer: answer, words: words };
             try {
-                const response = await fetch(`${window.location.origin}/colors`, {
+                const res = await fetch(`${window.location.origin}/colors`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(postBody)
                 });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    updateColorGrid(result.response);
+                const json = await res.json();
+                if (res.ok) {
+                    updateColorGrid(json.response);
                 } else {
-                    console.error('Error fetching colors:', result.response || 'Unknown server error');
+                    console.error('Error fetching colors', json);
                 }
-            } catch (error) {
-                console.error('Fetch error for /colors:', error);
-            }
-        }
-
-
-        function handleSquareClick(event) {
-            const square = event.target;
-            const row = square.dataset.row;
-            const col = square.dataset.col;
-            square.classList.toggle('is-active');
-
-            gridState[row][col] = square.classList.contains('is-active') ? 1 : 0;
+            } catch (err) { console.error('Fetch /colors failed', err); }
         }
 
         submitButton.addEventListener('click', async () => {
-            const postBody = {
-                grid: gridState,
-                enumValue: enumSelect.value,
-                answer: answerField.value
-            };
-
+            const payload = { grid: gridState, enumValue: enumSelect.value, answer: answerField.value };
             outputField.value = 'Finding words...';
             resetColorGrid();
-            submitButton.disabled = true;
-            submitButton.textContent = 'Searching...';
-
+            submitButton.disabled = true; submitButton.textContent = 'Searching...';
             try {
-                const response = await fetch(`${window.location.origin}/calculateWordleAnswer`, {
+                const resp = await fetch(`${window.location.origin}/calculateWordleAnswer`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(postBody)
+                    body: JSON.stringify(payload)
                 });
-
-                const result = await response.json();
-
-                if (response.ok) {
-
-                    let words = [];
-                    let outputText = "";
-
-                    if (Array.isArray(result.response)) {
-                        words = result.response;
-                        outputText = words.join('\n');
-                    } else if (typeof result.response === 'string') {
-                        outputText = result.response;
-                        words = outputText.split('\n').filter(Boolean);
-                    } else {
-                        outputText = "Error: Unexpected response format.";
-                    }
-
-                    outputField.value = outputText;
-
-                    const answer = answerField.value;
-
-                    if (answer && words.length > 0) {
-                        await fetchColors(answer, words);
-                    }
-
+                const body = await resp.json();
+                if (resp.ok) {
+                    let words = [], text = '';
+                    if (Array.isArray(body.response)) { words = body.response; text = words.join('\n'); }
+                    else if (typeof body.response === 'string') { text = body.response; words = text.split('\n').filter(Boolean); }
+                    else { text = 'Error: Unexpected response format.'; }
+                    outputField.value = text;
+                    if (answerField.value && words.length) await fetchColors(answerField.value, words);
                 } else {
-                    outputField.value = `Error: ${result.response || 'Unknown server error'}`;
+                    outputField.value = `Error: ${body.response || 'Server error'}`;
                 }
-
-            } catch (error) {
-                console.error('Fetch error:', error);
+            } catch (err) {
+                console.error('Fetch error', err);
                 outputField.value = 'Connection error. Please try again later.';
             } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = originalButtonText;
+                submitButton.disabled = false; submitButton.textContent = originalButtonText;
             }
+        });
+
+        clearButton.addEventListener('click', () => {
+            gridState = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => 0));
+            document.querySelectorAll('.grid-square').forEach(s => { s.classList.remove('is-active'); s.setAttribute('aria-pressed', 'false'); });
+            outputField.value = ''; resetColorGrid();
+        });
+
+        copyButton.addEventListener('click', () => {
+            const text = outputField.value;
+            if (!text) return;
+            navigator.clipboard?.writeText(text).catch(() => { });
+        });
+
+        downloadButton.addEventListener('click', () => {
+            const text = outputField.value || '';
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'matches.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
         async function fetchCurrentAnswer() {
             answerField.placeholder = "Loading target word...";
-            outputField.value = '';
-
+            outputField.value = "";
             try {
-                const response = await fetch(`${window.location.origin}/getAnswerWord`);
-
-                if (!response.ok) {
-                    throw new Error(`Server responded with ${response.status}`);
-                }
-
-                const answerText = await response.text();
-                answerField.value = answerText;
+                const res = await fetch(`${window.location.origin}/getAnswerWord`);
+                if (!res.ok) throw new Error('Server ' + res.status);
+                const text = await res.text();
+                answerField.value = text;
                 answerField.placeholder = "Enter target word";
-
-            } catch (error) {
-                console.error("Failed to fetch Wordle answer from backend:", error);
-                answerField.value = "";
-                answerField.placeholder = "Error loading word";
+            } catch (err) {
+                console.error('Failed to fetch answer', err);
+                answerField.value = ''; answerField.placeholder = 'Error loading word';
                 outputField.value = 'Failed to load initial data from the server. Please check connection and reload.';
             }
         }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'c' && (document.activeElement === document.body || document.activeElement === document.documentElement)) {
+                clearButton.click();
+            }
+        });
 
         createGrid();
         createColorGrid();
         fetchCurrentAnswer();
     </script>
-
 </body>
 </html>
