@@ -70,8 +70,8 @@ namespace WordleDrawBackendWebApi
             var strBuilder = new StringBuilder(1024);
             int responseCode;
             string outputString;
-            var words = colorRequest.words;
-            var answer = colorRequest.answer;
+            var words = colorRequest.words.Select(a => a.ToUpperInvariant()).ToList();
+            var answer = colorRequest.answer.ToUpperInvariant();
 
             ICollection<ICollection<Color>> colors = new List<ICollection<Color>>();
 
